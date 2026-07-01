@@ -19,10 +19,10 @@ int[9] calculate_bang_potions(int seed){
 	return rv;
 }
 
-string[int] SWIM_NAMES = { "<0>", "<1>", "Glitter", "<3>", "<4>", "Luster", "Dazzle", "Splendor", "Fritter", "<9>", "<10>" };
-string[int] JACK_NAMES = { "<0>", "<1>", "<2>", "<3>", "<4>", "Clementine", "<6>", "<7>", "<8>", "<9>", "<10>", "<11>", "<12>", "<13>", "<14>", "<15>", "<16>", "<17>", "<18>", "<19>", "<20>", "<21>",  "<22>", "<23>", "<24>", "<25>", "<26>", "<27>", "<28>", "<29>", "<30>", "<31>" };
-string[int] TWOPART_NAMES_1 = { "<0>", "Afternoon", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "Orangie", "<9>", "<10>", "<11>", "<12>", "<13>", "<14>", "<15>", "<16>", "<17>", "<18>", "Butterfly", "Hermit", "<21>", "<22>", "<23>", "Starfish", "<25>", "<26>" };
-string[int] TWOPART_NAMES_2 = { "Splash", "<1>", "Sparkle", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>", "<10>", "<11>", "<12>", "<13>", "<14>", "<15>", "<16>", "<17>", "Beam", "<19>", "<20>", "<21>", "Coral", "Anemone", "<24>" };
+string[int] SWIM_NAMES = { "Flicker", "Flitter", "Glitter", "Glimmer", "Shimmer", "Luster", "Dazzle", "Splendor", "Fritter", "Frizzle", "Tripper" };
+string[int] JACK_NAMES = { "<Banana>", "<Blackberry>", "<Blueberry>", "<Cantaloupe>", "<Cherry>", "Clementine", "<Dragonfruit>", "Durian", "<Fig>", "<Grapefruit>", "<Grape>", "<Honeydew>", "<Huckleberry>", "Jackfruit", "Kiwi", "<Kumquat>", "<Lemon>", "<Lime>", "<Mango>", "Orange", "<Pear>", "<Pineapple>", "<Raspberry>", "<Starfruit>", "<Strawberry>", "<Tangerine>", "<Tomato>", "<Watermelon>", "Grapple", "Pluot", "<Apricot>", "Plum" };
+string[int] TWOPART_NAMES_1 = { "<Morning>", "Afternoon", "<Evening>", "<Cloud>", "<Dolphin>", "<Waterspout>", "Reddie", "Purplie", "<Bluie>", "Orangie", "Greenie", "Pasty", "<Thunder>", "<Lightning>", "<14>", "<15>", "<16>", "<17>", "<18>", "<19>", "Butterfly", "<21>", "Hermit", "<23>", "<24>", "Starfish", "<26>", "<27>", "<28>" };
+string[int] TWOPART_NAMES_2 = { "Splash", "<1>", "Sparkle", "<3>", "<4>", "<5>", "Dreams", "<7>", "<8>", "Shipwreck", "<10>", "<11>", "<12>", "<13>", "Sofa", "Apple", "<16>", "<17>", "Beam", "<19>", "<20>", "<21>", "Coral", "Anemone", "<24>" };
 
 string choose(string[int] arr,rng r){
 	int n=count(arr);

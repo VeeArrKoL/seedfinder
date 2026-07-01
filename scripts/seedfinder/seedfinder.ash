@@ -82,8 +82,14 @@ void print_help(){
 void main(string command) {
 	if(command=="find"){
 		SeedData[int] data=find_seeds();
+		string all_seeds="";
 		foreach idx, seed_data in data {
 			print(seed_data.to_string());
+			all_seeds+=","+seed_data.seed;
+		}
+		if(all_seeds.length()>0){
+			print();
+			print("Possible seeds: "+all_seeds.substring(1));
 		}
 	}else if(command=="precalculate"){
 		precalculate_seeds();
