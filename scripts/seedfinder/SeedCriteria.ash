@@ -5,30 +5,37 @@ import <seedfinder/seedfinder_util.ash>;
 
 record SeedCriteria {
 	int[8] dreadscroll;
-	int[9] bang_potions;
+	string bang_potions;
 	string seahorse_name;
+	string condo_order;
 };
 
-boolean bang_potions_filled(SeedCriteria criteria){
-	for(int i=0;i<9;i++){
-		if(criteria.bang_potions[i]==0){
-			return false;
-		}
-	}
-	return true;
+SeedCriteria blank_criteria(){
+	SeedCriteria rv;
+	rv.bang_potions="?????????";
+	rv.condo_order="??????";
+	return rv;
 }
 
-int[string] bang_map = {
-	"sleepiness":1,
-	"confusion":2,
-	"inebriety":3,
-	"teleportitis":4,
-	"detection":5,
-	"ettin strength":6,
-	"mental acuity":7,
-	"blessing":8,
-	"healing":9
-};
+string validation_errors(SeedCriteria criteria){
+	string rv="";
+	if(criteria.bang_potions.length()!=9){
+		rv+=", Invalid bang_potions length";
+	}
+	
+	if(criteria.condo_order.length()!=6){
+		rv+=", Invalid condo_order length";
+	}
+	
+	if(rv.length()>0){
+		rv=rv.substring(2);
+	}
+	return rv;
+}
+
+boolean bang_potions_filled(SeedCriteria criteria){
+	return !criteria.bang_potions.contains_text("?");
+}
 
 SeedCriteria criteria_from_player(){
 	SeedCriteria rv;
@@ -37,10 +44,27 @@ SeedCriteria criteria_from_player(){
 		rv.dreadscroll[i]=get_property("dreadScroll"+(i+1)).to_int();
 	}
 	
+	rv.bang_potions="";
 	for(int i=0;i<9;i++){
 		string p=get_property("lastBangPotion"+(i+819));
-		if(p!=""){
-			rv.bang_potions[i]=bang_map[p];
+		if(p==""){
+			rv.bang_potions+="?";
+		}else{
+			rv.bang_potions+=p.char_at(0);
+		}
+	}
+	
+	string needsP=get_property("leprecondoNeedOrder");
+	if(needsP==""){
+		rv.condo_order="??????";
+	}else{
+		rv.condo_order="";
+		string[int] needs=needsP.split_string(",");
+		foreach idx, need in needs {
+			rv.condo_order+=need.char_at(0);
+		}
+		while(rv.length()<6){
+			rv.condo_order+="?";
 		}
 	}
 	
@@ -50,5 +74,27 @@ SeedCriteria criteria_from_player(){
 }
 
 string to_string(SeedCriteria criteria){
-	return `bang={flatten_arr(criteria.bang_potions)} ds={flatten_arr(criteria.dreadscroll)} seahorse={criteria.seahorse_name}`;
+	string rv="";
+	
+	if(criteria.bang_potions!="?????????"){
+		rv+=" bang="+criteria.bang_potions;
+	}
+	
+	string ds=flatten_arr(criteria.dreadscroll);
+	if(ds!="00000000"){
+		rv+=" ds="+ds;
+	}
+	
+	if(criteria.condo_order!="??????"){
+		rv+=" co="+criteria.condo_order;
+	}
+	
+	if(criteria.seahorse_name!=""){
+		rv+=" <seahorse>="+criteria.seahorse_name;
+	}
+	
+	if(rv.length()>0){
+		rv=rv.substring(1);
+	}
+	return rv;
 }

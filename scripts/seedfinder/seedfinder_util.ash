@@ -22,6 +22,21 @@ void shuffle(int[int] arr, rng r){
 	}
 }
 
+void shuffle(buffer arr, rng r){
+	for (int i=arr.length()-1;i>0;i--){
+		int idx=rand(0,i,r);
+		string temp = arr.char_at(i);
+		arr.replace(i,i+1,arr.char_at(idx));
+		arr.replace(idx,idx+1,temp);
+	}
+}
+
+string choose(string[int] arr,rng r){
+	int n=count(arr);
+	int idx=mt_rand(0,n-1,r);
+	return arr[idx];
+}
+
 string flatten_arr(int[int] arr){
 	string rv="";
 	foreach idx,val in arr {
