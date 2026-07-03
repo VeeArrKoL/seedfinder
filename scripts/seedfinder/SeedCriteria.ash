@@ -63,7 +63,7 @@ SeedCriteria criteria_from_player(){
 		foreach idx, need in needs {
 			rv.condo_order+=need.char_at(0);
 		}
-		while(rv.length()<6){
+		while(rv.condo_order.length()<6){
 			rv.condo_order+="?";
 		}
 	}
