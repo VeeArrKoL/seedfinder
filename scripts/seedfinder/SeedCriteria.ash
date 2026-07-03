@@ -54,6 +54,7 @@ SeedCriteria criteria_from_player(){
 		}
 	}
 	
+	/*
 	string needsP=get_property("leprecondoNeedOrder");
 	if(needsP==""){
 		rv.condo_order="??????";
@@ -67,6 +68,9 @@ SeedCriteria criteria_from_player(){
 			rv.condo_order+="?";
 		}
 	}
+	*/
+	// Currently broken?
+	rv.condo_order="??????";
 	
 	rv.seahorse_name=get_property("seahorse_name");
 	
