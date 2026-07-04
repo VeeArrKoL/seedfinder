@@ -17,24 +17,35 @@ SeedCriteria blank_criteria(){
 	return rv;
 }
 
-string validation_errors(SeedCriteria criteria){
-	string rv="";
-	if(criteria.bang_potions.length()!=9){
-		rv+=", Invalid bang_potions length";
+boolean validate_string(string criterion, string letters){
+	if(criterion.length()!=letters.length()){
+		return false;
 	}
 	
-	if(criteria.condo_order.length()!=6){
-		rv+=", Invalid condo_order length";
+	for(int i=0;i<criterion.length();i++){
+		string v=criterion.char_at(i);
+		if(v!="?" && !letters.contains_text(v)){
+			return false;
+		}
+	}
+	
+	return true;
+}
+
+string validation_errors(SeedCriteria criteria){
+	string rv="";
+	if(!validate_string(criteria.bang_potions,"scitdembh")){
+		rv+=", Invalid bang_potions";
+	}
+	
+	if(!validate_string(criteria.condo_order,"emdfbs")){
+		rv+=", Invalid condo_order";
 	}
 	
 	if(rv.length()>0){
 		rv=rv.substring(2);
 	}
 	return rv;
-}
-
-boolean bang_potions_filled(SeedCriteria criteria){
-	return !criteria.bang_potions.contains_text("?");
 }
 
 SeedCriteria criteria_from_player(){
@@ -54,7 +65,6 @@ SeedCriteria criteria_from_player(){
 		}
 	}
 	
-	/*
 	string needsP=get_property("leprecondoNeedOrder");
 	if(needsP==""){
 		rv.condo_order="??????";
@@ -68,9 +78,11 @@ SeedCriteria criteria_from_player(){
 			rv.condo_order+="?";
 		}
 	}
-	*/
-	// Currently broken?
-	rv.condo_order="??????";
+	if(!validate_string(rv.condo_order,"emdfbs")){
+		print(`Parsed invalid condo_order: {rv.condo_order}, ignoring.`,"purple");
+		print(`<{get_property("leprecondoNeedOrder")}>`,"purple");
+		rv.condo_order="??????";
+	}
 	
 	rv.seahorse_name=get_property("seahorse_name");
 	
@@ -101,4 +113,8 @@ string to_string(SeedCriteria criteria){
 		rv=rv.substring(1);
 	}
 	return rv;
+}
+
+boolean bang_potions_filled(SeedCriteria criteria){
+	return !criteria.bang_potions.contains_text("?");
 }
