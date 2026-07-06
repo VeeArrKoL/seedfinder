@@ -7,11 +7,11 @@ import <seedfinder/seedfinder_util.ash>;
 
 record SeedData {
 	int seed;
-	int[8] dreadscroll;
 	string bang_potions;
-	string seahorse_name;
-	string daily_dungeon;
 	string condo_order;
+	string daily_dungeon;
+	int[8] dreadscroll;
+	string seahorse_name;
 };
 
 SeedData data_from_seed(int seed){
@@ -26,7 +26,7 @@ SeedData data_from_seed(int seed){
 }
 
 string to_string(SeedData data){
-	return `{data.seed}: bang={data.bang_potions} dd={data.daily_dungeon} co={data.condo_order} ds={flatten_arr(data.dreadscroll)} seahorse={data.seahorse_name}`;
+	return `{data.seed}: bp={data.bang_potions} co={data.condo_order} dd={data.daily_dungeon} ds={flatten_arr(data.dreadscroll)} sh={data.seahorse_name}`;
 }
 
 boolean string_matches(string criteria, string data){
@@ -48,15 +48,22 @@ boolean matches(SeedData data, SeedCriteria criteria){
 		return false;
 	}
 	
+	if(!string_matches(criteria.daily_dungeon,data.daily_dungeon)){
+		return false;
+	}
+	
 	for(int i=0;i<8;i++){
 		if(criteria.dreadscroll[i]>0 && criteria.dreadscroll[i]!=data.dreadscroll[i]){
 			return false;
 		}
 	}
 	
-	// if(criteria.seahorse!="" && criteria.seahorse!=seed.seahorse){
-	// 	return false;
-	// }
+	if(criteria.seahorse_name!=""){
+		string seahorse_name_search=create_matcher("<.+?>",data.seahorse_name).replace_all(".+");
+		if(!create_matcher(seahorse_name_search,criteria.seahorse_name).find()){
+			return false;
+		}
+	}
 	
 	return true;
 }

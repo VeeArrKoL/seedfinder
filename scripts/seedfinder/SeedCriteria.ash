@@ -4,21 +4,24 @@
 import <seedfinder/seedfinder_util.ash>;
 
 record SeedCriteria {
-	int[8] dreadscroll;
 	string bang_potions;
-	string seahorse_name;
 	string condo_order;
+	string daily_dungeon;
+	int[8] dreadscroll;
+	string seahorse_name;
 };
 
+// Please use this function to manually instantiate a SeedCriteria. Do not use "new SeedCriteria()".
 SeedCriteria blank_criteria(){
 	SeedCriteria rv;
 	rv.bang_potions="?????????";
 	rv.condo_order="??????";
+	rv.daily_dungeon="????_????_????";
 	return rv;
 }
 
-boolean validate_string(string criterion, string letters){
-	if(criterion.length()!=letters.length()){
+boolean validate_string(string criterion, string letters, int len){
+	if(criterion.length()!=len){
 		return false;
 	}
 	
@@ -34,12 +37,16 @@ boolean validate_string(string criterion, string letters){
 
 string validation_errors(SeedCriteria criteria){
 	string rv="";
-	if(!validate_string(criteria.bang_potions,"scitdembh")){
+	if(!validate_string(criteria.bang_potions,"scitdembh",9)){
 		rv+=", Invalid bang_potions";
 	}
 	
-	if(!validate_string(criteria.condo_order,"emdfbs")){
+	if(!validate_string(criteria.condo_order,"emdfbs",6)){
 		rv+=", Invalid condo_order";
+	}
+	
+	if(!validate_string(criteria.daily_dungeon,"MDT_",14)){
+		rv+=", Invalid daily_dungeon";
 	}
 	
 	if(rv.length()>0){
@@ -49,11 +56,7 @@ string validation_errors(SeedCriteria criteria){
 }
 
 SeedCriteria criteria_from_player(){
-	SeedCriteria rv;
-	
-	for(int i=0;i<8;i++){
-		rv.dreadscroll[i]=get_property("dreadScroll"+(i+1)).to_int();
-	}
+	SeedCriteria rv=blank_criteria();
 	
 	rv.bang_potions="";
 	for(int i=0;i<9;i++){
@@ -78,13 +81,22 @@ SeedCriteria criteria_from_player(){
 			rv.condo_order+="?";
 		}
 	}
-	if(!validate_string(rv.condo_order,"emdfbs")){
+	if(!validate_string(rv.condo_order,"emdfbs",6)){
 		print(`Parsed invalid condo_order: {rv.condo_order}, ignoring.`,"purple");
 		print(`<{get_property("leprecondoNeedOrder")}>`,"purple");
 		rv.condo_order="??????";
 	}
 	
-	rv.seahorse_name=get_property("seahorse_name");
+	string ddData=get_property("dailyDungeonRooms");
+	if(validate_string(ddData,"MDT_",14)){
+		rv.daily_dungeon=ddData;
+	}
+	
+	for(int i=0;i<8;i++){
+		rv.dreadscroll[i]=get_property("dreadScroll"+(i+1)).to_int();
+	}
+	
+	rv.seahorse_name=get_property("seahorseName");
 	
 	return rv;
 }
@@ -93,7 +105,15 @@ string to_string(SeedCriteria criteria){
 	string rv="";
 	
 	if(criteria.bang_potions!="?????????"){
-		rv+=" bang="+criteria.bang_potions;
+		rv+=" bp="+criteria.bang_potions;
+	}
+	
+	if(criteria.condo_order!="??????"){
+		rv+=" co="+criteria.condo_order;
+	}
+	
+	if(criteria.daily_dungeon!="????_????_????"){
+		rv+=" dd="+criteria.daily_dungeon;
 	}
 	
 	string ds=flatten_arr(criteria.dreadscroll);
@@ -101,12 +121,8 @@ string to_string(SeedCriteria criteria){
 		rv+=" ds="+ds;
 	}
 	
-	if(criteria.condo_order!="??????"){
-		rv+=" co="+criteria.condo_order;
-	}
-	
 	if(criteria.seahorse_name!=""){
-		rv+=" <seahorse>="+criteria.seahorse_name;
+		rv+=" sh="+criteria.seahorse_name;
 	}
 	
 	if(rv.length()>0){
@@ -117,4 +133,39 @@ string to_string(SeedCriteria criteria){
 
 boolean bang_potions_filled(SeedCriteria criteria){
 	return !criteria.bang_potions.contains_text("?");
+}
+
+void report_error(SeedCriteria criteria){
+	string already_reported=get_property("_seedfinder_reportedErrors");
+	string criteriaStr=criteria.to_string();
+	if(already_reported.contains_text(criteriaStr)){
+		return;
+	}
+	set_property("_seedfinder_reportedErrors",already_reported+"|"+criteriaStr);
+	
+	string allow_error_reports=get_property("_seedfinder_allowErrorReports");
+	boolean do_error_report=false;
+	if(allow_error_reports=="true"){
+		do_error_report=true;
+	}else if(allow_error_reports==""){
+		do_error_report=user_confirm("Seedfinder found no matching seeds based on your player data. This shouldn't be possible. Is it okay to send error reports to improve seedfinder? (Proceeding automatically in 60 seconds.)",60000,false);
+	}
+	set_property("_seedfinder_allowErrorReports",to_string(do_error_report));
+	
+	if(do_error_report){
+		string msg="seedfinder error";
+		msg+=" // "+criteriaStr;
+		for(int i=0;i<9;i++){
+			msg+=" // "+get_property("lastBangPotion"+(i+819));
+		}
+		msg+=" // "+get_property("leprecondoNeedOrder");
+		msg+=" // "+get_property("dailyDungeonRooms");
+		msg+=" // ";
+		for(int i=0;i<8;i++){
+			msg+=get_property("dreadScroll"+(i+1));
+		}
+		msg+=" // "+get_property("seahorseName");
+		msg=msg.replace_string(";"," ").replace_string("|"," ");
+		boolean ignore_error=cli_execute("kmail to VeeArr || "+msg);
+	}
 }

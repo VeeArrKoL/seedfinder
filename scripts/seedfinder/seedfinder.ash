@@ -21,7 +21,7 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 	
 	int idx=0;
 	if(!criteria.bang_potions_filled()){
-		boolean proceed=user_confirm("Not all bang potions are known. Determining your seed without them may take a long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)",15000,true);
+		boolean proceed=user_confirm("Not all bang potions are known. Determining your seed without them may take a very long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)",15000,true);
 		if(!proceed){
 			abort("Could not calculate seed.");
 		}
@@ -56,7 +56,13 @@ SeedData[int] find_seeds(boolean printCriteria){
 	if(printCriteria){
 		print(`Player criteria: {criteria.to_string()}`,"purple");
 	}
-	return find_seeds(criteria);
+	
+	SeedData[int] rv=find_seeds(criteria);
+	
+	if(count(rv)==0){
+		criteria.report_error();
+	}
+	return rv;
 }
 
 SeedData[int] find_seeds(){
@@ -66,11 +72,12 @@ SeedData[int] find_seeds(){
 void precalculate_seeds(){
 	print("Precalculating seed data... this may take a few minutes.");
 	string[string] seed_data_map;
-	for(int seed=SEED_RANGE_MIN;seed<=SEED_RANGE_MAX;seed++){
-		if((seed-SEED_RANGE_MIN)%(SEED_RANGE_CNT/100)==0){
-			print((seed-SEED_RANGE_MIN)/(SEED_RANGE_CNT/100)+"% complete...");
+	for(int i=0;i<SEED_RANGE_CNT;i++){
+		if(i%(SEED_RANGE_CNT/100)==0){
+			print(i/(SEED_RANGE_CNT/100)+"% complete...");
 		}
 		
+		int seed=i+SEED_RANGE_MIN;
 		string key=calculate_bang_potions(seed);
 		if(seed_data_map contains key){
 			seed_data_map[key]+=","+seed;
