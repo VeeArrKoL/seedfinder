@@ -33,9 +33,9 @@ int[8] calculate_dreadscroll(int seed){
 }
 
 string[int] SWIM_NAMES = { "Flicker", "Flitter", "Glitter", "Glimmer", "Shimmer", "Luster", "Dazzle", "Splendor", "Fritter", "Frizzle", "Tripper" };
-string[int] JACK_NAMES = { "Banana", "Blackberry", "<Blueberry>", "Cantaloupe", "<Cherry>", "Clementine", "<Dragonfruit>", "Durian", "<Fig>", "Grape", "Grapefruit", "Honeydew", "Huckleberry", "Jackfruit", "Kiwi", "Kumquat", "Lemon", "Lime", "Mango", "Orange", "<Pear>", "Pineapple", "Raspberry", "<Starfruit>", "<Strawberry>", "Tangerine", "<Tomato>", "Watermelon", "Grapple", "Pluot", "<Apricot>", "Plum" };
-string[int] TWOPART_NAMES_1 = { "Morning", "Afternoon", "Evening", "Waterspout", "<Dolphin>", "Cloud", "Reddie", "Purplie", "<Bluie>", "Orangie", "Greenie", "Pasty", "<Lightning>", "Thunder", "<14>", "Scarlet", "<16>", "Sailboat", "<18>", "<19>", "Butterfly", "<Sushi>", "Hermit", "Diving", "Swordfish", "Starfish", "<Sturgeon>", "Urchin", "Beluga" };
-string[int] TWOPART_NAMES_2 = { "Splash", "Pie", "Sparkle", "<Gloaming>", "<Sand>", "<Waves>", "Dreams", "Munchies", "<Sailor>", "Shipwreck", "<Seagrass>", "Fizzy", "Bucket", "<Bait>", "Sofa", "Apple", "<16>", "Star", "Beam", "Valley", "<Blossom>", "<Scallop>", "Coral", "Anemone", "<Seaweed>" };
+string[int] JACK_NAMES = { "Banana", "Blackberry", "Blueberry", "Cantaloupe", "Cherry", "Clementine", "<Dragonfruit>", "Durian", "<Fig>", "Grape", "Grapefruit", "Honeydew", "Huckleberry", "Jackfruit", "Kiwi", "Kumquat", "Lemon", "Lime", "Mango", "Orange", "<Pear>", "Pineapple", "Raspberry", "<Starfruit>", "<Strawberry>", "Tangerine", "<Tomato>", "Watermelon", "Grapple", "Pluot", "Apricot", "Plum" };
+string[int] TWOPART_NAMES_1 = { "Morning", "Afternoon", "Evening", "Waterspout", "Dolphin", "Cloud", "Reddie", "Purplie", "<Bluie>", "Orangie", "Greenie", "Pasty", "<Lightning>", "Thunder", "<14>", "Scarlet", "Manta", "Sailboat", "Swimmy", "<Backstroke>", "Butterfly", "Sushi", "Hermit", "Diving", "Swordfish", "Starfish", "Sturgeon", "Urchin", "Beluga" };
+string[int] TWOPART_NAMES_2 = { "Splash", "Pie", "Sparkle", "<Gloaming>", "<Sand>", "<Waves>", "Dreams", "Munchies", "<Sailor>", "Shipwreck", "<Seagrass>", "Fizzy", "Bucket", "<Bait>", "Sofa", "Apple", "<16>", "Star", "Beam", "Valley", "<Blossom>", "<Scallop>", "Coral", "Anemone", "Seaweed" };
 
 string calculate_seahorse_name(int seed){	
 	rng r=php_seed(seed);

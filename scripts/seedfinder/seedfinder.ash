@@ -98,8 +98,9 @@ void print_seed(int seed){
 
 void print_help(){
 	print("find: Find potential seeds based on current player state. HIGHLY RECOMMENDED: Have all bang potions identified.");
-	print("precalculate: Recalculate the seed data file");
-	print("help: Print this information");
+	print("precalculate: Recalculate the seed data file.");
+	print("print <seed>: Print the information for an ascension with seed <seed>.");
+	print("help: Print this information.");
 }
 		
 void main(string command){
