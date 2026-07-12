@@ -1,6 +1,7 @@
 // Seedfinder
 // by VeeArr (#2045369)
 
+import <seedfinder/seedfinder_calc.ash>;
 import <seedfinder/seedfinder_util.ash>;
 
 record SeedCriteria {
@@ -68,12 +69,12 @@ SeedCriteria criteria_from_player(){
 		}
 	}
 	
-	string needsP=get_property("leprecondoNeedOrder");
-	if(needsP==""){
+	string needs_prop=get_property("leprecondoNeedOrder");
+	if(needs_prop==""){
 		rv.condo_order="??????";
 	}else{
 		rv.condo_order="";
-		string[int] needs=needsP.split_string(",");
+		string[int] needs=needs_prop.split_string(",");
 		foreach idx, need in needs {
 			rv.condo_order+=need.char_at(0);
 		}
@@ -87,9 +88,9 @@ SeedCriteria criteria_from_player(){
 		rv.condo_order="??????";
 	}
 	
-	string ddData=get_property("dailyDungeonRooms");
-	if(validate_string(ddData,"MDT_",14)){
-		rv.daily_dungeon=ddData;
+	string dd_data=get_property("dailyDungeonRooms");
+	if(validate_string(dd_data,"MDT_",14)){
+		rv.daily_dungeon=dd_data;
 	}
 	
 	for(int i=0;i<8;i++){
@@ -131,17 +132,55 @@ string to_string(SeedCriteria criteria){
 	return rv;
 }
 
+boolean string_matches(string criteria, string data){
+	for(int i=0;i<criteria.length();i++){
+		if(criteria.char_at(i)!="?" && criteria.char_at(i)!=data.char_at(i)){
+			return false;
+		}
+	}
+	return true;
+}
+
+boolean matches(SeedCriteria criteria, int seed){
+	if(criteria.bang_potions!="?????????" && !string_matches(criteria.bang_potions,calculate_bang_potions(seed))){
+		return false;
+	}
+	
+	if(criteria.condo_order!="??????" && !string_matches(criteria.condo_order,calculate_condo_order(seed))){
+		return false;
+	}
+	
+	if(criteria.daily_dungeon!="????_????_????" && !string_matches(criteria.daily_dungeon,calculate_daily_dungeon(seed))){
+		return false;
+	}
+	
+	if(flatten_arr(criteria.dreadscroll)!="00000000"){
+		int[8] seed_ds=calculate_dreadscroll(seed);
+		for(int i=0;i<8;i++){
+			if(criteria.dreadscroll[i]>0 && criteria.dreadscroll[i]!=seed_ds[i]){
+				return false;
+			}
+		}
+	}
+	
+	if(criteria.seahorse_name!="" && criteria.seahorse_name!=calculate_seahorse_name(seed)){
+		return false;
+	}
+	
+	return true;
+}
+
 boolean bang_potions_filled(SeedCriteria criteria){
 	return !criteria.bang_potions.contains_text("?");
 }
 
 void report_error(SeedCriteria criteria){
 	string already_reported=get_property("_seedfinder_reportedErrors");
-	string criteriaStr=criteria.to_string();
-	if(already_reported.contains_text(criteriaStr)){
+	string criteria_str=criteria.to_string();
+	if(already_reported.contains_text(criteria_str)){
 		return;
 	}
-	set_property("_seedfinder_reportedErrors",already_reported+"|"+criteriaStr);
+	set_property("_seedfinder_reportedErrors",already_reported+"|"+criteria_str);
 	
 	string allow_error_reports=get_property("_seedfinder_allowErrorReports");
 	boolean do_error_report=false;
@@ -154,7 +193,7 @@ void report_error(SeedCriteria criteria){
 	
 	if(do_error_report){
 		string msg="seedfinder error";
-		msg+=" // "+criteriaStr;
+		msg+=" // "+criteria_str;
 		for(int i=0;i<9;i++){
 			msg+=" // "+get_property("lastBangPotion"+(i+819));
 		}

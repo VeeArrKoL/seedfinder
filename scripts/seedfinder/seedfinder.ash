@@ -13,47 +13,47 @@ int SEED_RANGE_CNT=SEED_RANGE_MAX-SEED_RANGE_MIN+1;
 
 SeedData[int] find_seeds(SeedCriteria criteria){
 	SeedData[int] rv;
-	string errMsg=criteria.validation_errors();
-	if(errMsg.length()>0){
-		print(errMsg,"red");
+	string err_msg=criteria.validation_errors();
+	if(err_msg.length()>0){
+		print(err_msg,"red");
 		return rv;
 	}
 	
 	int idx=0;
-	if(!criteria.bang_potions_filled()){
-		boolean proceed=user_confirm("Not all bang potions are known. Determining your seed without them may take a very long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)",15000,true);
+	if(criteria.bang_potions_filled()){
+		string[string] seed_data_map;
+		file_to_map("seedfinder/seed_data.txt",seed_data_map);
+		string bangs=criteria.bang_potions;
+		string[int] seed_strs=split_string(seed_data_map[bangs],",");
+		foreach idx, seed_str in seed_strs {
+			int seed=seed_str.to_int();
+			if(criteria.matches(seed)){
+				rv[idx++]=data_from_seed(seed);
+			}
+		}
+		return rv;
+	}else{
+		string warning_msg="Not all bang potions are known. Determining your seed without them may take a very long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)";
+		print(warning_msg,"blue");
+		boolean proceed=user_confirm(warning_msg,15000,true);
 		if(!proceed){
 			abort("Could not calculate seed.");
 		}
 		for(int seed=SEED_RANGE_MIN;seed<=SEED_RANGE_MAX;seed++){
-			SeedData data=data_from_seed(seed);
-			if(data.matches(criteria)){
-				rv[idx++]=data;
+			if(criteria.matches(seed)){
+				rv[idx++]=data_from_seed(seed);
 				if(idx>1000){
 					abort("Over 1000 possible seeds");
 				}
 			}
 		}
 		return rv;
-	}else{
-		string[string] seed_data_map;
-		file_to_map("seedfinder/seed_data.txt",seed_data_map);
-		string bangs=criteria.bang_potions;
-		string[int] seedStrs=split_string(seed_data_map[bangs],",");
-		foreach idx, seedStr in seedStrs {
-			int seed=seedStr.to_int();
-			SeedData data=data_from_seed(seed);
-			if(data.matches(criteria)){
-				rv[idx++]=data;
-			}
-		}
-		return rv;
 	}
 }
 
-SeedData[int] find_seeds(boolean printCriteria){
+SeedData[int] find_seeds(boolean print_criteria){
 	SeedCriteria criteria=criteria_from_player();
-	if(printCriteria){
+	if(print_criteria){
 		print(`Player criteria: {criteria.to_string()}`,"purple");
 	}
 	

@@ -32,20 +32,21 @@ int[8] calculate_dreadscroll(int seed){
 	return rv;
 }
 
+// Seahorse name data collected by Fart Scauce (#2813285)
 string[int] SWIM_NAMES = { "Flicker", "Flitter", "Glitter", "Glimmer", "Shimmer", "Luster", "Dazzle", "Splendor", "Fritter", "Frizzle", "Tripper" };
-string[int] JACK_NAMES = { "Banana", "Blackberry", "Blueberry", "Cantaloupe", "Cherry", "Clementine", "Dragonfruit", "Durian", "Fig", "Grape", "Grapefruit", "Honeydew", "Huckleberry", "Jackfruit", "Kiwi", "Kumquat", "Lemon", "Lime", "Mango", "Orange", "Pear", "Pineapple", "Raspberry", "Starfruit", "<Strawberry>", "Tangerine", "<Tomato>", "Watermelon", "Grapple", "Pluot", "Apricot", "Plum" };
+string[int] JACK_NAMES = { "Banana", "Blackberry", "Blueberry", "Cantaloupe", "Cherry", "Clementine", "Dragonfruit", "Durian", "Fig", "Grape", "Grapefruit", "Honeydew", "Huckleberry", "Jackfruit", "Kiwi", "Kumquat", "Lemon", "Lime", "Mango", "Orange", "Pear", "Pineapple", "Raspberry", "Starfruit", "Strawberry", "Tangerine", "Tomato", "Watermelon", "Grapple", "Pluot", "Apricot", "Plum" };
 string[int] TWOPART_NAMES_1 = { "Morning", "Afternoon", "Evening", "Waterspout", "Dolphin", "Cloud", "Reddie", "Purplie", "Bluie", "Orangie", "Greenie", "Pasty", "Lightning", "Thunder", "Pokey", "Scarlet", "Manta", "Sailboat", "Swimmy", "Backstroke", "Butterfly", "Sushi", "Hermit", "Diving", "Swordfish", "Starfish", "Sturgeon", "Urchin", "Beluga" };
-string[int] TWOPART_NAMES_2 = { "Splash", "Pie", "Sparkle", "<Gloaming>", "<Sand>", "<Waves>", "Dreams", "Munchies", "Seagrass", "Shipwreck", "Sailor", "Fizzy", "Bucket", "Bait", "Sofa", "Apple", "Urchin", "Star", "Beam", "Valley", "Blossom", "Scallop", "Coral", "Anemone", "Seaweed" };
+string[int] TWOPART_NAMES_2 = { "Splash", "Pie", "Sparkle", "Waves", "Sand", "Gloaming", "Dreams", "Munchies", "Seagrass", "Shipwreck", "Sailor", "Fizzy", "Bucket", "Bait", "Sofa", "Apple", "Urchin", "Star", "Beam", "Valley", "Blossom", "Scallop", "Coral", "Anemone", "Seaweed" };
 
 string calculate_seahorse_name(int seed){	
 	rng r=php_seed(seed);
-	int nameType=-1;
-	while(nameType<1||nameType>3){
-		nameType=mt_rand(1,4,r);
+	int name_type=-1;
+	while(name_type<1||name_type>3){
+		name_type=mt_rand(1,4,r);
 	}
-	if(nameType==1){
+	if(name_type==1){
 		return choose(JACK_NAMES,r)+"jack";
-	}else if(nameType==2){
+	}else if(name_type==2){
 		return choose(TWOPART_NAMES_1,r)+" "+choose(TWOPART_NAMES_2,r);
 	}else{
 		return choose(SWIM_NAMES,r)+"swim";
