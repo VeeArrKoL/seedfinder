@@ -1,5 +1,5 @@
 # seedfinder
-KoLmafia script for finding the current ascension seed. This seed is used for randomizing various ascension-specific things, including:
+KoLmafia script for finding the current [ascension seed](https://wiki.kingdomofloathing.com/Ascension_Seed). This seed is used for randomizing various ascension-specific things, including:
 * Effects of [bang potions](https://wiki.kingdomofloathing.com/Dungeons_of_Doom_potion)
 * The order of [Daily Dungeon](https://wiki.kingdomofloathing.com/The_Daily_Dungeon) rooms
 * [Dreadscroll](https://wiki.kingdomofloathing.com/Mer-kin_dreadscroll) answers

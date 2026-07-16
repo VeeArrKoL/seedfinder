@@ -52,3 +52,12 @@ string calculate_seahorse_name(int seed){
 		return choose(SWIM_NAMES,r)+"swim";
 	}
 }
+
+string calculate_slime_potions(int seed){
+	string primary=calculate_shuffle("123",seed);
+	primary=primary.char_at(0)+primary.char_at(2)+primary.char_at(1);
+	string secondary=calculate_shuffle("123",seed);
+	string tertiary=calculate_shuffle("123ies",seed);
+	tertiary=tertiary.substring(0,4)+tertiary.char_at(5)+tertiary.char_at(4);
+	return `{primary}_{secondary}_{tertiary}`;
+}

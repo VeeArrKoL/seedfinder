@@ -11,6 +11,7 @@ record SeedData {
 	string daily_dungeon;
 	int[8] dreadscroll;
 	string seahorse_name;
+	string slime_potions;
 };
 
 SeedData data_from_seed(int seed){
@@ -21,9 +22,10 @@ SeedData data_from_seed(int seed){
 	rv.daily_dungeon=calculate_daily_dungeon(seed);
 	rv.dreadscroll=calculate_dreadscroll(seed);
 	rv.seahorse_name=calculate_seahorse_name(seed);
+	rv.slime_potions=calculate_slime_potions(seed);
 	return rv;
 }
 
 string to_string(SeedData data){
-	return `{data.seed}: bp={data.bang_potions} co={data.condo_order} dd={data.daily_dungeon} ds={flatten_arr(data.dreadscroll)} sh={data.seahorse_name}`;
+	return `{data.seed}: bp={data.bang_potions} co={data.condo_order} dd={data.daily_dungeon} ds={flatten_arr(data.dreadscroll)} sh={data.seahorse_name} sl={data.slime_potions}`;
 }

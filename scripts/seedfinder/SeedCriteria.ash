@@ -2,6 +2,7 @@
 // by VeeArr (#2045369)
 
 import <seedfinder/seedfinder_calc.ash>;
+import <seedfinder/seedfinder_lookups.ash>;
 import <seedfinder/seedfinder_util.ash>;
 
 record SeedCriteria {
@@ -10,6 +11,7 @@ record SeedCriteria {
 	string daily_dungeon;
 	int[8] dreadscroll;
 	string seahorse_name;
+	string slime_potions;
 };
 
 // Please use this function to manually instantiate a SeedCriteria. Do not use "new SeedCriteria()".
@@ -18,6 +20,7 @@ SeedCriteria blank_criteria(){
 	rv.bang_potions="?????????";
 	rv.condo_order="??????";
 	rv.daily_dungeon="????_????_????";
+	rv.slime_potions="???_???_??????";
 	return rv;
 }
 
@@ -50,6 +53,10 @@ string validation_errors(SeedCriteria criteria){
 		rv+=", Invalid daily_dungeon";
 	}
 	
+	if(!validate_string(criteria.slime_potions,"123ies_",14)){
+		rv+=", Invalid slime_potions";
+	}
+	
 	if(rv.length()>0){
 		rv=rv.substring(2);
 	}
@@ -60,8 +67,8 @@ SeedCriteria criteria_from_player(){
 	SeedCriteria rv=blank_criteria();
 	
 	rv.bang_potions="";
-	for(int i=0;i<9;i++){
-		string p=get_property("lastBangPotion"+(i+819));
+	for(int i=819;i<=827;i++){
+		string p=get_property("lastBangPotion"+i);
 		if(p==""){
 			rv.bang_potions+="?";
 		}else{
@@ -93,11 +100,19 @@ SeedCriteria criteria_from_player(){
 		rv.daily_dungeon=dd_data;
 	}
 	
-	for(int i=0;i<8;i++){
-		rv.dreadscroll[i]=get_property("dreadScroll"+(i+1)).to_int();
+	for(int i=1;i<=8;i++){
+		rv.dreadscroll[i-1]=get_property("dreadScroll"+i).to_int();
 	}
 	
 	rv.seahorse_name=get_property("seahorseName");
+	
+	rv.slime_potions="";
+	for(int i=3885;i<=3896;i++){
+		rv.slime_potions+=lookup_slime_potion(get_property("lastSlimeVial"+i));
+		if(i==3887||i==3890){
+			rv.slime_potions+="_";
+		}
+	}
 	
 	return rv;
 }
@@ -124,6 +139,10 @@ string to_string(SeedCriteria criteria){
 	
 	if(criteria.seahorse_name!=""){
 		rv+=" sh="+criteria.seahorse_name;
+	}
+	
+	if(criteria.slime_potions!="???_???_??????"){
+		rv+=" sl="+criteria.slime_potions;
 	}
 	
 	if(rv.length()>0){
@@ -167,6 +186,10 @@ boolean matches(SeedCriteria criteria, int seed){
 		return false;
 	}
 	
+	if(criteria.slime_potions!="???_???_??????" && !string_matches(criteria.slime_potions,calculate_slime_potions(seed))){
+		return false;
+	}
+	
 	return true;
 }
 
@@ -194,16 +217,19 @@ void report_error(SeedCriteria criteria){
 	if(do_error_report){
 		string msg="seedfinder error";
 		msg+=" // "+criteria_str;
-		for(int i=0;i<9;i++){
-			msg+=" // "+get_property("lastBangPotion"+(i+819));
+		for(int i=819;i<=827;i++){
+			msg+=" // "+get_property("lastBangPotion"+i);
 		}
 		msg+=" // "+get_property("leprecondoNeedOrder");
 		msg+=" // "+get_property("dailyDungeonRooms");
 		msg+=" // ";
-		for(int i=0;i<8;i++){
-			msg+=get_property("dreadScroll"+(i+1));
+		for(int i=1;i<=8;i++){
+			msg+=get_property("dreadScroll"+i);
 		}
 		msg+=" // "+get_property("seahorseName");
+		for(int i=3885;i<=3896;i++){
+			msg+=" // "+get_property("lastSlimeVial"+i);
+		}
 		msg=msg.replace_string(";"," ").replace_string("|"," ");
 		boolean ignore_error=cli_execute("kmail to VeeArr || "+msg);
 	}
