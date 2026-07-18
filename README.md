@@ -28,6 +28,11 @@ Each row represents a seed, along with the calculated data for that seed, includ
 * Dreadscroll answers
 * Seahorse name
 
+For a full description of what each field in the output data represents, use:
+```
+seedfinder explain
+```
+
 ## API
 It is possible to call the underlying seedfinder functions directly and get strucutred data as a response. The most common use, I expect, will be to find all of the seeds that the current user could have, along with the data for each of those seeds:
 ```

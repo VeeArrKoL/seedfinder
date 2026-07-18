@@ -10,6 +10,7 @@ record SeedCriteria {
 	string condo_order;
 	string daily_dungeon;
 	int[8] dreadscroll;
+	string rave_combos;
 	string seahorse_name;
 	string slime_potions;
 };
@@ -20,6 +21,7 @@ SeedCriteria blank_criteria(){
 	rv.bang_potions="?????????";
 	rv.condo_order="??????";
 	rv.daily_dungeon="????_????_????";
+	rv.rave_combos="??????";
 	rv.slime_potions="???_???_??????";
 	return rv;
 }
@@ -51,6 +53,10 @@ string validation_errors(SeedCriteria criteria){
 	
 	if(!validate_string(criteria.daily_dungeon,"MDT_",14)){
 		rv+=", Invalid daily_dungeon";
+	}
+	
+	if(!validate_string(criteria.rave_combos,"BbPpRr",6)){
+		rv+=", Invalid rave_combos";
 	}
 	
 	if(!validate_string(criteria.slime_potions,"123ies_",14)){
@@ -104,6 +110,23 @@ SeedCriteria criteria_from_player(){
 		rv.dreadscroll[i-1]=get_property("dreadScroll"+i).to_int();
 	}
 	
+	rv.rave_combos="";
+	for(int i=1;i<=6;i++){
+		string p=get_property("raveCombo"+i);
+		if(p==""){
+			rv.rave_combos+="?";
+		}else{
+			string[int] parts=p.split_string(",");
+			string letter=parts[0].char_at(0);
+			if(parts[1].char_at(0)<parts[2].char_at(0)){
+				letter=letter.to_upper_case();
+			}else{
+				letter=letter.to_lower_case();
+			}
+			rv.rave_combos+=letter;
+		}
+	}
+	
 	rv.seahorse_name=get_property("seahorseName");
 	
 	rv.slime_potions="";
@@ -135,6 +158,10 @@ string to_string(SeedCriteria criteria){
 	string ds=flatten_arr(criteria.dreadscroll);
 	if(ds!="00000000"){
 		rv+=" ds="+ds;
+	}
+	
+	if(criteria.rave_combos!="??????"){
+		rv+=" rc="+criteria.rave_combos;
 	}
 	
 	if(criteria.seahorse_name!=""){
@@ -182,6 +209,10 @@ boolean matches(SeedCriteria criteria, int seed){
 		}
 	}
 	
+	if(criteria.rave_combos!="??????" && !string_matches(criteria.rave_combos,calculate_rave_combos(seed))){
+		return false;
+	}
+	
 	if(criteria.seahorse_name!="" && criteria.seahorse_name!=calculate_seahorse_name(seed)){
 		return false;
 	}
@@ -225,6 +256,9 @@ void report_error(SeedCriteria criteria){
 		msg+=" // ";
 		for(int i=1;i<=8;i++){
 			msg+=get_property("dreadScroll"+i);
+		}
+		for(int i=1;i<=6;i++){
+			msg+=" // "+get_property("raveCombo"+i);
 		}
 		msg+=" // "+get_property("seahorseName");
 		for(int i=3885;i<=3896;i++){

@@ -98,9 +98,17 @@ void print_seed(int seed){
 
 void print_help(){
 	print("find: Find potential seeds based on current player state. HIGHLY RECOMMENDED: Have all bang potions identified.");
-	print("precalculate: Recalculate the seed data file.");
 	print("print <seed>: Print the information for an ascension with seed <seed>.");
+	print("explain: Explain the data printed for each seed.");
+	print("precalculate: Recalculate the seed data file.");
 	print("help: Print this information.");
+}
+
+void explain_seed_data(){
+	string explain_html=file_to_buffer("seedfinder/explain.html");
+	int idx=explain_html.index_of("<h2>");
+	explain_html=explain_html.substring(idx);
+	print_html(explain_html);
 }
 		
 void main(string command){
@@ -108,17 +116,25 @@ void main(string command){
 		SeedData[int] data=find_seeds(true);
 		string all_seeds="";
 		foreach idx, seed_data in data {
-			print(seed_data.to_string());
+			print_html(seed_data.to_string_html());
 			all_seeds+=","+seed_data.seed;
 		}
 		if(count(data)>0){
 			print();
-			print(count(data)+" possible seeds: "+all_seeds.substring(1),"blue");
+			string word="seed";
+			if(count(data)>1){
+				word="seeds";
+			}
+			print(`{count(data)} possible {word}: {all_seeds.substring(1)}`,"blue");
+		}else{
+			print("No matching seeds found.","red");
 		}
 	}else if(command=="precalculate"){
 		precalculate_seeds();
 	}else if(command.starts_with("print ")){
 		print_seed(command.substring(6).to_int());
+	}else if(command=="explain"){
+		explain_seed_data();
 	}else if(command=="help"){
 		print_help();
 	}else{

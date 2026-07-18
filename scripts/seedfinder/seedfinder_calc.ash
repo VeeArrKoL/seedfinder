@@ -32,6 +32,17 @@ int[8] calculate_dreadscroll(int seed){
 	return rv;
 }
 
+string calculate_rave_combos(int seed){
+	string combos=calculate_shuffle("BbPpRr",seed);
+	int[6] combo_order={3,4,2,1,0,5};
+	string rv="";
+	for(int i=0;i<6;i++){
+		rv+=combos.char_at(combo_order[i]);
+	}
+	return rv;
+}
+	
+
 // Seahorse name data collected by Fart Scauce (#2813285)
 string[int] SWIM_NAMES = { "Flicker", "Flitter", "Glitter", "Glimmer", "Shimmer", "Luster", "Dazzle", "Splendor", "Fritter", "Frizzle", "Tripper" };
 string[int] JACK_NAMES = { "Banana", "Blackberry", "Blueberry", "Cantaloupe", "Cherry", "Clementine", "Dragonfruit", "Durian", "Fig", "Grape", "Grapefruit", "Honeydew", "Huckleberry", "Jackfruit", "Kiwi", "Kumquat", "Lemon", "Lime", "Mango", "Orange", "Pear", "Pineapple", "Raspberry", "Starfruit", "Strawberry", "Tangerine", "Tomato", "Watermelon", "Grapple", "Pluot", "Apricot", "Plum" };
