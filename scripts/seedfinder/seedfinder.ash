@@ -51,13 +51,25 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 	}
 }
 
+SeedData[int] find_seeds(SeedCriteria criteria, boolean allow_retry){
+	SeedData[int] rv=find_seeds(criteria);
+	
+	if(allow_retry && count(rv)==0 && criteria.condo_order!="??????"){
+		print("Found no matching seeds, re-trying without considering condo_order.","green");
+		criteria.condo_order="??????";
+		rv=find_seeds(criteria);
+	}
+	
+	return rv;
+}
+
 SeedData[int] find_seeds(boolean print_criteria){
 	SeedCriteria criteria=criteria_from_player();
 	if(print_criteria){
 		print(`Player criteria: {criteria.to_string()}`,"purple");
 	}
 	
-	SeedData[int] rv=find_seeds(criteria);
+	SeedData[int] rv=find_seeds(criteria,true);
 	
 	if(count(rv)==0){
 		criteria.report_error();
