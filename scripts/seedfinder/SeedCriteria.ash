@@ -10,9 +10,12 @@ record SeedCriteria {
 	string condo_order;
 	string daily_dungeon;
 	int[8] dreadscroll;
+	string island_barracks;
 	string rave_combos;
 	string seahorse_name;
 	string slime_potions;
+	int[69] violet_fog;
+	int[6] wine_glyphs;
 };
 
 // Please use this function to manually instantiate a SeedCriteria. Do not use "new SeedCriteria()".
@@ -21,6 +24,7 @@ SeedCriteria blank_criteria(){
 	rv.bang_potions="?????????";
 	rv.condo_order="??????";
 	rv.daily_dungeon="????_????_????";
+	rv.island_barracks="???_???_???_???_???_???";
 	rv.rave_combos="??????";
 	rv.slime_potions="???_???_??????";
 	return rv;
@@ -53,6 +57,10 @@ string validation_errors(SeedCriteria criteria){
 	
 	if(!validate_string(criteria.daily_dungeon,"MDT_",14)){
 		rv+=", Invalid daily_dungeon";
+	}
+	
+	if(!validate_string(criteria.island_barracks,"123CKR_",23)){
+		rv+=", Invalid island_barracks";
 	}
 	
 	if(!validate_string(criteria.rave_combos,"BbPpRr",6)){
@@ -110,6 +118,11 @@ SeedCriteria criteria_from_player(){
 		rv.dreadscroll[i-1]=get_property("dreadScroll"+i).to_int();
 	}
 	
+	// ib
+	// It's pretty much impossible to read the hacienda state from
+	// mafia prefs since it changes post-quest, so don't try to include
+	// it in the criteria.
+	
 	rv.rave_combos="";
 	for(int i=1;i<=6;i++){
 		string p=get_property("raveCombo"+i);
@@ -137,30 +150,96 @@ SeedCriteria criteria_from_player(){
 		}
 	}
 	
+	string[int] vf_pref=get_property("violetFogLayout").split_string(",");
+	if(vf_pref.count()==92){
+		for(int choice=48;choice<=70;choice++){
+			int baseIdx=4*(choice-48);
+			if(choice>=62){
+				baseIdx++;
+			}
+			for(int c=0;c<3;c++){
+				int idx=baseIdx+c;
+				int v=to_int(vf_pref[idx]);
+				if(v>0){
+					rv.violet_fog[(choice-48)*3+c]=v;
+				}
+			}
+		}
+	}
+	
+	int[6] wine_glyphs;
+	string wg_pref=get_property("seedfinder_wineGlyphs");
+	if(wg_pref!=""){
+		string[int] parts=wg_pref.split_string(":");
+		int asc=to_int(parts[0]);
+		if(parts[1].contains_text("0")||my_ascensions()>asc){
+			set_property("seedfinder_wineGlyphs","");
+			wg_pref="";
+		}else{
+			for(int i=0;i<6;i++){
+				wine_glyphs[i]=to_int(parts[1].char_at(i));
+			}
+		}
+	}
+	if(is_default(wine_glyphs)){
+		item glasses=$item[Lord Spookyraven's spectacles];
+		item equipped_acc;
+		boolean glasses_equipped=false;
+		if(have_equipped(glasses)){
+			glasses_equipped=true;
+		}else if(get_inventory()[glasses]>0){
+			equipped_acc=equipped_item($slot[acc3]);
+			equip(glasses,$slot[acc3]);
+			glasses_equipped=true;
+		}
+		if(glasses_equipped){
+			for(int i=0;i<6;i++){
+				int item_id=2271+i;
+				string desc=visit_url("desc_item.php?whichitem="+to_item(item_id).descid,false);
+				matcher m=create_matcher("Arcane Glyph #(.)",desc);
+				if(m.find()){
+					wine_glyphs[i]=to_int(m.group(1));
+				}else{
+					wine_glyphs[i]=0;
+				}
+			}
+		}
+		if(equipped_acc!=$item[none]){
+			equip(equipped_acc,$slot[acc3]);
+		}
+		if(!is_default(wine_glyphs)){
+			set_property("seedfinder_wineGlyphs",my_ascensions()+":"+flatten_arr(wine_glyphs));
+		}
+	}
+	rv.wine_glyphs=wine_glyphs;
+	
 	return rv;
 }
 
 string to_string(SeedCriteria criteria){
 	string rv="";
 	
-	if(criteria.bang_potions!="?????????"){
+	if(!is_default(criteria.bang_potions)){
 		rv+=" bp="+criteria.bang_potions;
 	}
 	
-	if(criteria.condo_order!="??????"){
+	if(!is_default(criteria.condo_order)){
 		rv+=" co="+criteria.condo_order;
 	}
 	
-	if(criteria.daily_dungeon!="????_????_????"){
+	if(!is_default(criteria.daily_dungeon)){
 		rv+=" dd="+criteria.daily_dungeon;
 	}
 	
-	string ds=flatten_arr(criteria.dreadscroll);
-	if(ds!="00000000"){
-		rv+=" ds="+ds;
+	if(!is_default(criteria.dreadscroll)){
+		rv+=" ds="+flatten_arr(criteria.dreadscroll);
 	}
 	
-	if(criteria.rave_combos!="??????"){
+	if(!is_default(criteria.island_barracks)){
+		rv+=" ib="+criteria.island_barracks;
+	}
+	
+	if(!is_default(criteria.rave_combos)){
 		rv+=" rc="+criteria.rave_combos;
 	}
 	
@@ -168,8 +247,16 @@ string to_string(SeedCriteria criteria){
 		rv+=" sh="+criteria.seahorse_name;
 	}
 	
-	if(criteria.slime_potions!="???_???_??????"){
+	if(!is_default(criteria.slime_potions)){
 		rv+=" sl="+criteria.slime_potions;
+	}
+	
+	if(!is_default(criteria.violet_fog)){
+		rv+=" vf="+flatten_arr(criteria.violet_fog,",");
+	}
+	
+	if(!is_default(criteria.wine_glyphs)){
+		rv+=" wg="+flatten_arr(criteria.wine_glyphs);
 	}
 	
 	if(rv.length()>0){
@@ -187,29 +274,37 @@ boolean string_matches(string criteria, string data){
 	return true;
 }
 
-boolean matches(SeedCriteria criteria, int seed){
-	if(criteria.bang_potions!="?????????" && !string_matches(criteria.bang_potions,calculate_bang_potions(seed))){
-		return false;
-	}
-	
-	if(criteria.condo_order!="??????" && !string_matches(criteria.condo_order,calculate_condo_order(seed))){
-		return false;
-	}
-	
-	if(criteria.daily_dungeon!="????_????_????" && !string_matches(criteria.daily_dungeon,calculate_daily_dungeon(seed))){
-		return false;
-	}
-	
-	if(flatten_arr(criteria.dreadscroll)!="00000000"){
-		int[8] seed_ds=calculate_dreadscroll(seed);
-		for(int i=0;i<8;i++){
-			if(criteria.dreadscroll[i]>0 && criteria.dreadscroll[i]!=seed_ds[i]){
-				return false;
-			}
+boolean array_matches(int[int] criteria, int[int] data){
+	for(int i=0;i<criteria.count();i++){
+		if(criteria[i]>0 && criteria[i]!=data[i]){
+			return false;
 		}
 	}
+	return true;
+}
+
+boolean matches(SeedCriteria criteria, int seed){
+	if(!is_default(criteria.bang_potions) && !string_matches(criteria.bang_potions,calculate_bang_potions(seed))){
+		return false;
+	}
 	
-	if(criteria.rave_combos!="??????" && !string_matches(criteria.rave_combos,calculate_rave_combos(seed))){
+	if(!is_default(criteria.condo_order) && !string_matches(criteria.condo_order,calculate_condo_order(seed))){
+		return false;
+	}
+	
+	if(!is_default(criteria.daily_dungeon) && !string_matches(criteria.daily_dungeon,calculate_daily_dungeon(seed))){
+		return false;
+	}
+	
+	if(!is_default(criteria.dreadscroll) && !array_matches(criteria.dreadscroll,calculate_dreadscroll(seed))){
+		return false;
+	}
+	
+	if(!is_default(criteria.island_barracks) && !string_matches(criteria.island_barracks,calculate_island_barracks(seed))){
+		return false;
+	}
+	
+	if(!is_default(criteria.rave_combos) && !string_matches(criteria.rave_combos,calculate_rave_combos(seed))){
 		return false;
 	}
 	
@@ -217,15 +312,19 @@ boolean matches(SeedCriteria criteria, int seed){
 		return false;
 	}
 	
-	if(criteria.slime_potions!="???_???_??????" && !string_matches(criteria.slime_potions,calculate_slime_potions(seed))){
+	if(!is_default(criteria.slime_potions) && !string_matches(criteria.slime_potions,calculate_slime_potions(seed))){
+		return false;
+	}
+	
+	if(!is_default(criteria.violet_fog) && !array_matches(criteria.violet_fog,calculate_violet_fog(seed))){
+		return false;
+	}
+	
+	if(!is_default(criteria.wine_glyphs) && !array_matches(criteria.wine_glyphs,calculate_wine_glyphs(seed))){
 		return false;
 	}
 	
 	return true;
-}
-
-boolean bang_potions_filled(SeedCriteria criteria){
-	return !criteria.bang_potions.contains_text("?");
 }
 
 void report_error(SeedCriteria criteria){
@@ -247,23 +346,28 @@ void report_error(SeedCriteria criteria){
 	
 	if(do_error_report){
 		string msg="seedfinder error";
-		msg+=" // "+criteria_str;
+		msg+=" /bp/ "+criteria_str;
 		for(int i=819;i<=827;i++){
-			msg+=" // "+get_property("lastBangPotion"+i);
+			msg+=" / "+get_property("lastBangPotion"+i);
 		}
-		msg+=" // "+get_property("leprecondoNeedOrder");
-		msg+=" // "+get_property("dailyDungeonRooms");
-		msg+=" // ";
+		msg+=" /co/ "+get_property("leprecondoNeedOrder");
+		msg+=" /dd/ "+get_property("dailyDungeonRooms");
+		msg+=" /ds/ ";
 		for(int i=1;i<=8;i++){
 			msg+=get_property("dreadScroll"+i);
 		}
+		msg+=" /ib/ "+get_property("haciendaLayout");
 		for(int i=1;i<=6;i++){
-			msg+=" // "+get_property("raveCombo"+i);
+			msg+=(i==1?" /rc/ ":" / ");
+			msg+=get_property("raveCombo"+i);
 		}
-		msg+=" // "+get_property("seahorseName");
+		msg+=" /sh/ "+get_property("seahorseName");
 		for(int i=3885;i<=3896;i++){
-			msg+=" // "+get_property("lastSlimeVial"+i);
+			msg+=(i==3885?" /sl/ ":" / ");
+			msg+=get_property("lastSlimeVial"+i);
 		}
+		msg+=" /vf/ "+get_property("violetFogLayout");
+		msg+=" /wg/ "+get_property("seedfinder_wineGlyphs");
 		msg=msg.replace_string(";"," ").replace_string("|"," ");
 		boolean ignore_error=cli_execute("kmail to VeeArr || "+msg);
 	}

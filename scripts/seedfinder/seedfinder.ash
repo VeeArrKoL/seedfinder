@@ -19,8 +19,9 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 		return rv;
 	}
 	
-	int idx=0;
-	if(criteria.bang_potions_filled()){
+	string dd_key=criteria.daily_dungeon;
+	dd_key=dd_key.substring(0,4)+dd_key.substring(7,9)+dd_key.substring(12,14);
+	if(!criteria.bang_potions.contains_text("?")){
 		string[string] seed_data_map;
 		file_to_map("seedfinder/seed_data.txt",seed_data_map);
 		string bangs=criteria.bang_potions;
@@ -28,12 +29,26 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 		foreach idx, seed_str in seed_strs {
 			int seed=seed_str.to_int();
 			if(criteria.matches(seed)){
-				rv[idx++]=data_from_seed(seed);
+				rv[rv.count()]=data_from_seed(seed);
+			}
+		}
+		return rv;
+	}else if(!dd_key.contains_text("?")){
+		string[string] seed_data_map_dd;
+		file_to_map("seedfinder/seed_data_dd.txt",seed_data_map_dd);
+		string[int] seed_strs=split_string(seed_data_map_dd[dd_key],",");
+		foreach idx, seed_str in seed_strs {
+			int seed=seed_str.to_int();
+			if(criteria.matches(seed)){
+				rv[rv.count()]=data_from_seed(seed);				
+				if(rv.count()>1000){
+					abort("Over 1000 possible seeds");
+				}
 			}
 		}
 		return rv;
 	}else{
-		string warning_msg="Not all bang potions are known. Determining your seed without them may take a very long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)";
+		string warning_msg="Not all bang potions are known and the Daily Dungeon has not been completed. Determining your seed without either data point may take a very long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)";
 		print(warning_msg,"blue");
 		boolean proceed=user_confirm(warning_msg,15000,true);
 		if(!proceed){
@@ -41,8 +56,8 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 		}
 		for(int seed=SEED_RANGE_MIN;seed<=SEED_RANGE_MAX;seed++){
 			if(criteria.matches(seed)){
-				rv[idx++]=data_from_seed(seed);
-				if(idx>1000){
+				rv[rv.count()]=data_from_seed(seed);
+				if(rv.count()>1000){
 					abort("Over 1000 possible seeds");
 				}
 			}
@@ -84,36 +99,65 @@ SeedData[int] find_seeds(){
 void precalculate_seeds(){
 	print("Precalculating seed data... this may take a few minutes.");
 	string[string] seed_data_map;
+	string[string] seed_data_map_dd;
 	for(int i=0;i<SEED_RANGE_CNT;i++){
 		if(i%(SEED_RANGE_CNT/100)==0){
 			print(i/(SEED_RANGE_CNT/100)+"% complete...");
 		}
-		
 		int seed=i+SEED_RANGE_MIN;
+		
 		string key=calculate_bang_potions(seed);
 		if(seed_data_map contains key){
 			seed_data_map[key]+=","+seed;
 		}else{
 			seed_data_map[key]=to_string(seed);
 		}
+		
+		key=calculate_daily_dungeon(seed);
+		key=key.substring(0,4)+key.substring(7,9)+key.substring(12,14);
+		if(seed_data_map_dd contains key){
+			seed_data_map_dd[key]+=","+seed;
+		}else{
+			seed_data_map_dd[key]=to_string(seed);
+		}
 	}
 	
 	print("Writing to seed_data.txt ...");
 	map_to_file(seed_data_map,"seedfinder/seed_data.txt");
+	
+	print("Writing to seed_data_dd.txt ...");
+	map_to_file(seed_data_map_dd,"seedfinder/seed_data_dd.txt");
+	
 	print("Done");
 }
 
-void print_seed(int seed){
+void print_seed(int seed, string field_spec){
 	SeedData data=data_from_seed(seed);
-	print(data);
+	print(data.to_string(field_spec));
+}
+
+void print_seed(int seed){
+	print_seed(seed,"");
+}
+
+void print_commands(){
+	print_html("<font color=blue>seedfinder find [&lt;fields&gt;]</font>: Find potential seeds based on current player state. HIGHLY RECOMMENDED: Either have all bang potions identified or have completed the Daily Dungeon.");
+	print_html("<font color=blue>seedfinder print &lt;seed&gt; [&lt;fields&gt;]</font>: Print the information for an ascension with seed &lt;seed&gt;.");
+	print_html("<font color=blue>seedfinder explain</font>: Explain the data printed for each seed.");
+	print_html("<font color=blue>seedfinder precalculate</font>: Recalculate the seed data file.");
+	print_html("<font color=blue>seedfinder help</font>: Print this information.");
+	print();
+	print("[<fields>] is an optional comma-separated list of 2-letter field codes designating which fields to include in the output. See \"seedfinder explain\" for a listing of the available fields.");
 }
 
 void print_help(){
-	print("find: Find potential seeds based on current player state. HIGHLY RECOMMENDED: Have all bang potions identified.");
-	print("print <seed>: Print the information for an ascension with seed <seed>.");
-	print("explain: Explain the data printed for each seed.");
-	print("precalculate: Recalculate the seed data file.");
-	print("help: Print this information.");
+	print_html("<font size='6'><b>seedfinder</b></font>");
+	print_html("<font size='4'>by <a href='showplayer.php?who=2045369'>VeeArr (#2045369)</a></font>");
+	print("with contributions from:");
+	print_html("<a href='showplayer.php?who=2813285'>Fart Scauce (#2813285)</a>");
+	print_html("<a href='showplayer.php?who=2753050'>Fransisc0 (#2753050)</a>");
+	print();
+	print_commands();
 }
 
 void explain_seed_data(){
@@ -124,11 +168,12 @@ void explain_seed_data(){
 }
 		
 void main(string command){
-	if(command=="find"){
+	if(command.starts_with("find")){
+		string field_spec=command.substring(4);
 		SeedData[int] data=find_seeds(true);
 		string all_seeds="";
 		foreach idx, seed_data in data {
-			print_html(seed_data.to_string_html());
+			print_html(seed_data.to_string_html(field_spec));
 			all_seeds+=","+seed_data.seed;
 		}
 		if(count(data)>0){
@@ -144,7 +189,9 @@ void main(string command){
 	}else if(command=="precalculate"){
 		precalculate_seeds();
 	}else if(command.starts_with("print ")){
-		print_seed(command.substring(6).to_int());
+		int seed=to_int(command.substring(6,13));
+		string field_spec=command.substring(13);
+		print_seed(seed,field_spec);
 	}else if(command=="explain"){
 		explain_seed_data();
 	}else if(command=="help"){
@@ -152,6 +199,6 @@ void main(string command){
 	}else{
 		print("Unknown seedfinder command: "+command,"red");
 		print();
-		print_help();
+		print_commands();
 	}
 }

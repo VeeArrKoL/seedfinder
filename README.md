@@ -5,6 +5,7 @@ KoLmafia script for finding the current [ascension seed](https://wiki.kingdomofl
 * [Dreadscroll](https://wiki.kingdomofloathing.com/Mer-kin_dreadscroll) answers
 * [Seahorse](https://wiki.kingdomofloathing.com/Wild_seahorse) names
 * The order of [Leprecondo](https://wiki.kingdomofloathing.com/Leprechaun%27s_Condo) needs
+* The solutions to puzzles in the [Me and My Nemesis Quest](https://wiki.kingdomofloathing.com/Me_and_My_Nemesis)
 
 ## Installation
 Install seedfinder into KoLmafia by using this command in the gCLI:
@@ -12,10 +13,10 @@ Install seedfinder into KoLmafia by using this command in the gCLI:
 git checkout VeeArrKoL/seedfinder
 ```
 
-Note that seedfinder includes a large pre-computed seed data file, and takes up around 75MB of disk space.
+Note that seedfinder includes several large pre-computed seed data files, and takes up around 145MB of disk space.
 
 ## Usage
-First, identify all of the bang potions by either consuming them or using them in combat. Seedfinder can still attempt to find a seed if your bang potions are not identified, but it will be very slow and will be unlikely to meaningfully narrow down your seed without this information.
+First, identify all of the bang potions by either consuming them or using them in combat. Alternatively, you may complete the Daily Dungeon, but this will not narrow down the range of possible seeds as effectively. Seedfinder can still attempt to find a seed if neither of these data points is available, but it will be very slow and will be unlikely to meaningfully narrow down your seed without this information.
 
 To list data about all of the seeds that could apply to your current ascension, based on the information available, run:
 ```
@@ -32,6 +33,18 @@ For a full description of what each field in the output data represents, use:
 ```
 seedfinder explain
 ```
+
+For a full list of available commands, see:
+```
+seedfinder help
+```
+
+## Configuration
+Seedfinder supports the following configuration properties:
+
+| Property | Default | Description |
+| --- | --- | --- |
+| `seedfinder_defaultFieldSpec` | `bp,dd,ds,sh` | The default fields to display if no field spec is given. See `seedfinder explain` for a list of fields. |
 
 ## API
 It is possible to call the underlying seedfinder functions directly and get strucutred data as a response. The most common use, I expect, will be to find all of the seeds that the current user could have, along with the data for each of those seeds:
@@ -54,7 +67,7 @@ foreach idx, seed in possibleSeeds {
 }
 ```
 
-Alternatively, you can construct a `SeedCriteria` to get seeds matching specific criteria. The usual caveat that this will be very slow unless all of the bang potion fields are filled out applies.
+Alternatively, you can construct a `SeedCriteria` to get seeds matching specific criteria. The usual caveat that this will be very slow unless all of the bang potion fields are filled out or the Daily Dungeon has been completed applies.
 ```
 import <seedfinder/seedfinder.ash>;
 
