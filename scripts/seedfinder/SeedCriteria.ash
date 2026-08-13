@@ -183,16 +183,7 @@ SeedCriteria criteria_from_player(){
 	}
 	if(is_default(wine_glyphs)){
 		item glasses=$item[Lord Spookyraven's spectacles];
-		item equipped_acc;
-		boolean glasses_equipped=false;
-		if(have_equipped(glasses)){
-			glasses_equipped=true;
-		}else if(get_inventory()[glasses]>0){
-			equipped_acc=equipped_item($slot[acc3]);
-			equip(glasses,$slot[acc3]);
-			glasses_equipped=true;
-		}
-		if(glasses_equipped){
+		if(have_equipped(glasses)||get_inventory()[glasses]>0){
 			for(int i=0;i<6;i++){
 				int item_id=2271+i;
 				string desc=visit_url("desc_item.php?whichitem="+to_item(item_id).descid,false);
@@ -203,9 +194,6 @@ SeedCriteria criteria_from_player(){
 					wine_glyphs[i]=0;
 				}
 			}
-		}
-		if(equipped_acc!=$item[none]){
-			equip(equipped_acc,$slot[acc3]);
 		}
 		if(!is_default(wine_glyphs)){
 			set_property("seedfinder_wineGlyphs",my_ascensions()+":"+flatten_arr(wine_glyphs));
