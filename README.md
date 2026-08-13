@@ -13,7 +13,7 @@ Install seedfinder into KoLmafia by using this command in the gCLI:
 git checkout VeeArrKoL/seedfinder
 ```
 
-Note that seedfinder includes several large pre-computed seed data files, and takes up around 145MB of disk space.
+Note that seedfinder includes several large pre-computed seed data files, and takes up around 65MB of disk space.
 
 ## Usage
 First, identify all of the bang potions by either consuming them or using them in combat. Alternatively, you may complete the Daily Dungeon, but this will not narrow down the range of possible seeds as effectively. Seedfinder can still attempt to find a seed if neither of these data points is available, but it will be very slow and will be unlikely to meaningfully narrow down your seed without this information.

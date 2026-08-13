@@ -4,12 +4,8 @@
 script "seedfinder";
 notify "VeeArr";
 
-import <seedfinder/SeedData.ash>;
 import <seedfinder/SeedCriteria.ash>;
-
-int SEED_RANGE_MIN=1000000;
-int SEED_RANGE_MAX=9999999;
-int SEED_RANGE_CNT=SEED_RANGE_MAX-SEED_RANGE_MIN+1;
+import <seedfinder/SeedData.ash>;
 
 SeedData[int] find_seeds(SeedCriteria criteria){
 	SeedData[int] rv;
@@ -19,26 +15,17 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 		return rv;
 	}
 	
+	int[int] seeds;
 	string dd_key=criteria.daily_dungeon;
 	dd_key=dd_key.substring(0,4)+dd_key.substring(7,9)+dd_key.substring(12,14);
 	if(!criteria.bang_potions.contains_text("?")){
-		string[string] seed_data_map;
-		file_to_map("seedfinder/seed_data.txt",seed_data_map);
-		string bangs=criteria.bang_potions;
-		string[int] seed_strs=split_string(seed_data_map[bangs],",");
-		foreach idx, seed_str in seed_strs {
-			int seed=seed_str.to_int();
-			if(criteria.matches(seed)){
-				rv[rv.count()]=data_from_seed(seed);
-			}
-		}
-		return rv;
+		seeds=load_seeds("seed_data_bp",criteria.bang_potions);
 	}else if(!dd_key.contains_text("?")){
-		string[string] seed_data_map_dd;
-		file_to_map("seedfinder/seed_data_dd.txt",seed_data_map_dd);
-		string[int] seed_strs=split_string(seed_data_map_dd[dd_key],",");
-		foreach idx, seed_str in seed_strs {
-			int seed=seed_str.to_int();
+		seeds=load_seeds("seed_data_dd",dd_key);
+	}
+	
+	if(seeds.count()>0){
+		foreach idx, seed in seeds {
 			if(criteria.matches(seed)){
 				rv[rv.count()]=data_from_seed(seed);				
 				if(rv.count()>1000){
@@ -46,7 +33,6 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 				}
 			}
 		}
-		return rv;
 	}else{
 		string warning_msg="Not all bang potions are known and the Daily Dungeon has not been completed. Determining your seed without either data point may take a very long time and will likely be inconclusive. Continue anyway? (Continuing automatically in 15 seconds.)";
 		print(warning_msg,"blue");
@@ -62,14 +48,15 @@ SeedData[int] find_seeds(SeedCriteria criteria){
 				}
 			}
 		}
-		return rv;
 	}
+	
+	return rv;
 }
 
 SeedData[int] find_seeds(SeedCriteria criteria, boolean allow_retry){
 	SeedData[int] rv=find_seeds(criteria);
 	
-	if(allow_retry && count(rv)==0 && criteria.condo_order!="??????"){
+	if(allow_retry && count(rv)==0 && !is_default(criteria.condo_order)){
 		print("Found no matching seeds, re-trying without considering condo_order.","green");
 		criteria.condo_order="??????";
 		rv=find_seeds(criteria);
@@ -98,35 +85,24 @@ SeedData[int] find_seeds(){
 
 void precalculate_seeds(){
 	print("Precalculating seed data... this may take a few minutes.");
-	string[string] seed_data_map;
-	string[string] seed_data_map_dd;
+	int[string,int] seed_data_map_bp;
+	int[string,int] seed_data_map_dd;
 	for(int i=0;i<SEED_RANGE_CNT;i++){
-		if(i%(SEED_RANGE_CNT/100)==0){
+		if(i%(SEED_RANGE_CNT/20)==0){
 			print(i/(SEED_RANGE_CNT/100)+"% complete...");
 		}
 		int seed=i+SEED_RANGE_MIN;
 		
 		string key=calculate_bang_potions(seed);
-		if(seed_data_map contains key){
-			seed_data_map[key]+=","+seed;
-		}else{
-			seed_data_map[key]=to_string(seed);
-		}
+		seed_data_map_bp[key][seed_data_map_bp[key].count()]=seed;
 		
 		key=calculate_daily_dungeon(seed);
 		key=key.substring(0,4)+key.substring(7,9)+key.substring(12,14);
-		if(seed_data_map_dd contains key){
-			seed_data_map_dd[key]+=","+seed;
-		}else{
-			seed_data_map_dd[key]=to_string(seed);
-		}
+		seed_data_map_dd[key][seed_data_map_dd[key].count()]=seed;
 	}
 	
-	print("Writing to seed_data.txt ...");
-	map_to_file(seed_data_map,"seedfinder/seed_data.txt");
-	
-	print("Writing to seed_data_dd.txt ...");
-	map_to_file(seed_data_map_dd,"seedfinder/seed_data_dd.txt");
+	write_seeds(seed_data_map_bp,"seed_data_bp");
+	write_seeds(seed_data_map_dd,"seed_data_dd");
 	
 	print("Done");
 }
